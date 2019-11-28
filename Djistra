@@ -1,1 +1,145 @@
+#include "标头.h"
+#include <iostream>
+using namespace std;
 
+void creatGraph(Graph&graph)
+{
+	//InitGraph(graph);
+	int n, m;
+	int i,j;
+	cout << "输入节点数：" ;
+	cin >> n;
+	graph.pointnum = n;
+	cout << "输入边数：" ;
+	cin >> m;
+	graph.edgenum = m;
+	//graph->judge = 0;
+	graph.matrix = (Matrix **)malloc(sizeof(Matrix*)*n);
+	*graph.matrix = new Matrix[n];
+	for (i = 0; i < n; i++)
+		graph.matrix[i] = new Matrix[n];
+	//graph.matrix = (Matrix *)malloc(sizeof(Matrix[n])*n);
+	cout << "输入权重："<<endl;
+	for(i=0;i<n;i++)
+		for (j = 0; j < n; j++)
+		{
+			int c;
+			cin >> c;
+			graph.matrix[i][j].weight = c;
+			//cin >> graph.matrix[i][j].weight;
+			//cin>>graph.matrix[i][j].judge ;
+		}
+	cout << "输入判断：" << endl;
+	for (i = 0; i < n; i++)
+		for (j = 0; j < n; j++)
+		{
+			int c;
+			cin >> c;
+			graph.matrix[i][j].judge = c;
+			//cin >> graph.matrix[i][j].judge;
+		}
+	graph.path = new int[n];
+}
+void InitList(Graph graph, List&list)
+{
+	int i;
+	list.elem = (Memory*)malloc(sizeof(Memory)*graph.pointnum);
+	//list.elem->minpath = 0;
+	//list.elem->position = 0;
+	list.elem = new Memory[graph.pointnum];
+	for (i = 0; i < graph.pointnum; i++)
+		list.elem[i].position = i;
+	for (i = 0; i < graph.pointnum; i++)
+		list.elem[i].minpath = i;
+}
+void doDjistra(Graph graph,List&result, List&quantity)
+{
+	int i,j=0,n=1;
+	double minweight = 0,count=65535;
+	int num = graph.pointnum;
+	for (i = 0; i < graph.pointnum; i++)
+	{
+		quantity.elem[i].position = i;
+		quantity.elem[i].minpath = graph.matrix[0][i].weight;
+	}
+	while ((num> 1)&&(j!=graph.pointnum-1))
+	{
+		int min = 0;
+		//count = 1000;
+		if (j == 0)
+		{
+			for (i = 0; i < graph.pointnum; i++)
+			{
+				if (graph.matrix[j][i].weight < count)
+				{
+					count = graph.matrix[j][i].weight;
+					min = i;
+				}
+			}
+		}
+		else
+		{
+			for (i = 0; i < graph.pointnum; i++)
+			{
+				graph.matrix[j][i].weight = graph.matrix[j][i].weight+minweight;
+			}
+			for (i = 0; i < graph.pointnum ; i++)
+			{
+				if (graph.matrix[j][i].weight > quantity.elem[i].minpath)
+				{
+					graph.matrix[j][i].weight = quantity.elem[i].minpath;
+				}
+				if (graph.matrix[j][i].weight < quantity.elem[i].minpath)
+				{
+					quantity.elem[i].minpath = graph.matrix[j][i].weight;
+				}
+			}
+			for (i = 0; i < graph.pointnum; i++)
+			{
+				//raph->matrix[i][j].weight = graph->matrix[i][j].weight + minweight;
+				if (graph.matrix[j][i].weight < count&&graph.matrix[j][i].judge==0)
+				{
+					count = graph.matrix[j][i].weight;
+					min = i;
+				}
+			}
+		}
+			result.elem[n].position = min;
+			result.elem[n].minpath = count;
+			n++;
+			minweight = count;
+			for (i = 0; i < graph.pointnum; i++)
+			{
+				graph.matrix[i][min].judge = 1;
+			}
+			//graph->matrix[j][min].judge = 1;
+			graph.matrix[min][j].judge = 1;
+			j = min;
+			minweight = count;
+			num--;
+			count = 1000;
+	}
+	/*for (i = 1; i < graph.pointnum; i++)
+	{
+		cout <<"位置："<< result.elem[i].position;
+		cout <<"路径："<<result.elem[i].minpath;
+		cout << endl;
+	}*/
+}
+int main()
+{
+	Graph testgraph;
+	List testlist,test;
+	creatGraph(testgraph);
+	InitList(testgraph, testlist);
+	InitList(testgraph, test);
+	doDjistra(testgraph,testlist,test);
+	for (int i = 1; i < testgraph.pointnum; i++)
+	{
+		cout << "位置：" << testlist.elem[i].position;
+		cout << "路径：" << testlist.elem[i].minpath;
+		cout << endl;
+	}
+	system("pause");
+	return 0;   
+}
